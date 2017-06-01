@@ -1,0 +1,15 @@
+p22element = VectorElement("Lagrange", triangle, 2)
+dktelement = FiniteElement("DKT", triangle, 3)
+p = TrialFunction(p22element)
+q = TestFunction(p22element)
+p22 = inner(nabla_grad(p), nabla_grad(q))*dx
+
+u = TrialFunction(dktelement)
+v = TestFunction(dktelement)
+dkt = u*v*dx
+
+f = Coefficient(dktelement)
+force = f*v*dx
+
+elements = [p22element, dktelement]
+forms = [p22, dkt, force]
