@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include <dolfin.h>
-#include "DKTGradient.hpp"
+#include "DKTGradient.h"
 
 DKTGradient::DKTGradient()
 {
