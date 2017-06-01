@@ -104,20 +104,6 @@ DKTGradient::apply_vec(const std::vector<double>& p3coeffs,
   Eigen::Map<const Eigen::Matrix<double, 9, 1>> arg(p3coeffs.data());
   Eigen::Map<Eigen::Matrix<double, 12, 1>> dest(p22coeffs.data());
   dest = M * arg;
-  /*
-  // Copy coefficients for partial derivatives
-  p22coeffs[0] = p3coeffs[1];    p22coeffs[1] = p3coeffs[2];
-  p22coeffs[2] = p3coeffs[4];    p22coeffs[3] = p3coeffs[5];
-  p22coeffs[4] = p3coeffs[7];    p22coeffs[5] = p3coeffs[8];
-
-  // Matrix * vec multiplication
-  for (auto i = 0; i < 6; ++i) {
-  p22coeffs[6+i] = 0;
-  for (auto j = 0; j < 9; ++j) {
-  p22coeffs[6+i] += M.coeff(i,j)*p3coeffs[j];
-  }
-  }
-  */
 }
 
 /// Compute M^T A M
@@ -130,10 +116,3 @@ DKTGradient::apply(const std::vector<double>& p22tensor,
   Eigen::Map<Eigen::Matrix<double, 9, 9, Eigen::RowMajor>> dkt(dkttensor.data());
   dkt = Mt * p22 * M;
 }
-
-/*
-  std::shared_ptr<Array<double>> DKTGradient::get_local() const
-  {
-  return std::make_shared<Array<double>>(12*9, M.data());
-  }
-*/
