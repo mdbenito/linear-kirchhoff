@@ -34,7 +34,8 @@ using namespace dolfin;
  */
 void
 KirchhoffAssembler::assemble(GenericTensor& A,
-                             const Form& a)
+                             const Form& a,
+                             const Form& p22form)
 {
 
   // Check whether we should call the multi-core assembler
@@ -70,7 +71,7 @@ KirchhoffAssembler::assemble(GenericTensor& A,
   AssemblerBase::check(a);
 
   // Create data structure for local assembly data
-  UFC ufc(*p22form);
+  UFC ufc(p22form);
 
   // Off-process coefficients
   auto coefficients = a.coefficients();
@@ -91,7 +92,7 @@ KirchhoffAssembler::assemble(GenericTensor& A,
 //-----------------------------------------------------------------------------
 void KirchhoffAssembler::assemble_cells(
   GenericTensor& A,
-  const Form& a,         /* The P3_red form*/
+  const Form& a,         /* The P_3^red form*/
   UFC& ufc,
   std::shared_ptr<const MeshFunction<std::size_t>> domains,
   std::vector<double>* values)
@@ -106,13 +107,13 @@ void KirchhoffAssembler::assemble_cells(
 
   const Mesh& mesh = *(a.mesh());
   
-  assert(ufc.form.rank() == a.rank());  // MBD CHECK THIS
-  assert(ufc.form.rank() == 2);
-  
   auto form_rank = ufc.form.rank();
+  assert(form_rank == a.rank());  // MBD CHECK THIS
+  assert(form_rank == 2);
+  
 
   // Collect pointers to dof maps
-  // MBD We use the P3 form a here, so this should be ok
+  // MBD We use the DKT form 'a' here, so this should be ok
   std::vector<const GenericDofMap*> dofmaps;
   for (auto i = 0; i < form_rank; ++i)
     dofmaps.push_back(a.function_space(i)->dofmap().get());
@@ -120,7 +121,7 @@ void KirchhoffAssembler::assemble_cells(
   // Vector to hold dof map for a cell
   std::vector<ArrayView<const dolfin::la_index>> dofs(form_rank);
 
-  // Cell integral
+  // Cell integral for p22
   auto integral = ufc.default_cell_integral.get();
 
   // Check whether integral is domain-dependent
@@ -129,10 +130,11 @@ void KirchhoffAssembler::assemble_cells(
   // Assemble over cells
   ufc::cell ufc_cell;
   std::vector<double> coordinate_dofs;
-  DKTGradient::P3Tensor D;  // MBD where to store Mt * A * M
+  DKTGradient::P3Tensor D;  // MBD stores Mt * A * M
   
   Progress p(AssemblerBase::progress_message(A.rank(), "cells"),
              mesh.num_cells());
+
   
   for (CellIterator cell(mesh); !cell.end(); ++cell)
   {
@@ -155,7 +157,7 @@ void KirchhoffAssembler::assemble_cells(
     grad.update(*cell);    // MBD Update DKTGradient operator
     
     // Get local-to-global dof maps for cell
-    // MBD: we need to use the dofmaps of form a (P3)
+    // MBD: we need to use the dofmaps for DKT
     bool empty_dofmap = false;
     for (std::size_t i = 0; i < form_rank; ++i)
     {
@@ -165,7 +167,7 @@ void KirchhoffAssembler::assemble_cells(
 
     // Skip if at least one dofmap is empty
     // MBD: why would it?
-    if (empty_dofmap)
+    if (empty_dofmap) 
       continue;
 
     // Tabulate cell tensor
@@ -174,7 +176,7 @@ void KirchhoffAssembler::assemble_cells(
                               ufc_cell.orientation);
 
     grad.apply(ufc.A, D);
-
+    // Should use dkt local->global dofs for insertion into global tensor
     A.add_local(D.data(), dofs);
 
     p++;

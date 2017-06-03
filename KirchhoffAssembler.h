@@ -24,17 +24,11 @@ namespace dolfin
   class KirchhoffAssembler : public AssemblerBase
   {
     DKTGradient grad;
-    std::shared_ptr<const Form> p22form;
     
   public:
 
     /// Constructor
-    /// *Arguments*
-    /// p2form (_Form_)
-    ///   The (\nabla u, \nabla v) P_2 form to assemble the tensor from.
-
-  KirchhoffAssembler(std::shared_ptr<const Form> _p22form)
-    : p22form(_p22form) {}
+    KirchhoffAssembler() {}    
 
     /// Assemble tensor from given form
     ///
@@ -43,7 +37,10 @@ namespace dolfin
     ///         The tensor to assemble.
     ///     a (_Form_)
     ///         The P_3^{red} form to assemble the tensor from
-    void assemble(GenericTensor& A, const Form& a);
+    ///     p22form (_Form_)
+    ///         The (\nabla u, \nabla v) P_2^2 form to assemble the
+    ///         tensor from.
+    void assemble(GenericTensor& A, const Form& a, const Form& p22form);
 
     void assemble_cells(GenericTensor& A, const Form& a, UFC& ufc,
                         std::shared_ptr<const MeshFunction<std::size_t>> domains,
