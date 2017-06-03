@@ -40,8 +40,13 @@ KirchhoffAssembler::assemble(GenericTensor& A,
   // Check whether we should call the multi-core assembler
   // MBD FIXME: implement this / throw right exception
 
-  #ifdef HAS_OPENMP
+  #ifdef I_DONTHAVE_HAS_OPENMP
+  // This global parameter is not in the global parameter list
+  // and dolfin throws a runtime error:
   const std::size_t num_threads = parameters["num_threads"];
+  // Solve with:
+  //dolfin::parameters.add("num_threads", 0);
+  // Or by disabling the whole chunk in the ifdef, as I did.
   if (num_threads > 0)
   {
     throw -1;
