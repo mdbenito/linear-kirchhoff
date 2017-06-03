@@ -7,12 +7,17 @@
 
 DKTGradient::DKTGradient()
 {
+  /* TODO: I can only fix the ones if they are correctly placed, 
+   i.e. after removing the permutation_hack() and inserting the values
+   of M in the right places...
+
   M.setZero();
 
   // Fill identity submatrices
   M(0,1) = 1; M(1,2) = 1;
   M(2,4) = 1; M(3,5) = 1;
   M(4,7) = 1; M(5,8) = 1;
+  */
 }
 
 /// Updates the operator matrix for the given Cell
@@ -25,9 +30,28 @@ DKTGradient::update(const dolfin::Cell& cell)
 }
 
 void
+permutation_hack(DKTGradient::M_t& M)
+{
+  const int rows = 12;
+  Eigen::Matrix<double, 12, 12, Eigen::RowMajor> P;
+  P.setZero();
+  // position in array is destination row, value is source row:
+  int permutations[] = {0,6,1,7,2,8,3,9,4,10,5,11};
+  for (int i = 0; i < 12; ++i)
+    P(permutations[i], i) = 1.0;
+  M = (P * M).eval();
+}
+
+void
 DKTGradient::update(const std::vector<double>& cc)
 {
   assert(cc.size() == 6);
+  // FIXME: do this in the constructor once permutation_hack is removed:
+  // Fill identity submatrices
+  M.setZero();
+  M(0,1) = 1; M(1,2) = 1;
+  M(2,4) = 1; M(3,5) = 1;
+  M(4,7) = 1; M(5,8) = 1;
 
   // FIXME: use Eigen for these too
   std::array<double, 3*2> tt;     // tangent vectors
@@ -91,8 +115,9 @@ DKTGradient::update(const std::vector<double>& cc)
   copy_tt(2, 10, 3);
   copyTT(2, 10, 4);
 
-  Mt = M.transpose();
+  permutation_hack(M);
 
+  Mt = M.transpose();
 }
 
 /// Compute $ M v $ for $ v \in P_3^{red} $
