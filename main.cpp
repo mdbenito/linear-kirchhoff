@@ -6,6 +6,7 @@
 
 #include "KirchhoffAssembler.h"
 #include "LinearKirchhoff.h"
+#include "HermiteDirichletBC.h"
 
 using namespace dolfin;
 
@@ -45,7 +46,7 @@ main(void)
   auto u0 = std::make_shared<Constant>(0.0);
   auto boundary = std::make_shared<DirichletBoundary>();
 
-  // HermiteDirichletBC bc(W, u0, boundary);
+  HermiteDirichletBC bc(W, u0, boundary);
 
   LinearKirchhoff::Form_dkt a(W, W);
   LinearKirchhoff::Form_force L(W);
@@ -59,7 +60,19 @@ main(void)
 
   PETScMatrix A;
   KirchhoffAssembler assembler;
+  Assembler rhs_assembler;
   assembler.assemble(A, a, p22);
-    
+
+  Vector b;
+  rhs_assembler.assemble(b, L);
+
+  
+  bc.apply(A, b);
+
+  solve(A, *u.vector(), b);
+  // Save solution in VTK format
+  File file("solution.pvd");
+  file << u;
+  
   return 1;
 }

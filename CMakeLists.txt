@@ -73,8 +73,9 @@ endforeach(UFL_FILENAME)
 
 # Executable
 add_executable(${PROJECT_NAME}
-               ${FFC_GENERATED_SOURCES} 
-               KirchhoffAssembler.cpp DKTGradient.cpp main.cpp)
+  ${FFC_GENERATED_SOURCES}
+  HermiteDirichletBC.cpp
+  KirchhoffAssembler.cpp DKTGradient.cpp main.cpp)
 
 # Target libraries
 target_link_libraries(${PROJECT_NAME} ${DOLFIN_LIBRARIES})
