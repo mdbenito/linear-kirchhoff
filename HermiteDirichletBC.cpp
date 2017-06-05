@@ -626,9 +626,6 @@ void HermiteDirichletBC::init_facets(const MPI_Comm mpi_comm) const
 void HermiteDirichletBC::init_from_sub_domain(std::shared_ptr<const SubDomain>
                                        sub_domain) const
 {
-  // MBD FUCK YOU
-  dolfin_assert(false);
-  /*
   dolfin_assert(_facets.empty());
 
   // FIXME: This can be made more efficient, we should be able to
@@ -647,14 +644,15 @@ void HermiteDirichletBC::init_from_sub_domain(std::shared_ptr<const SubDomain>
   FacetFunction<std::size_t> sub_domains(mesh, 1);
 
   // Set geometric dimension (needed for SWIG interface)
-  sub_domain->_geometric_dimension = mesh->geometry().dim();
+  // MBD _geometric_dimension is private and we are not friends :(
+  // Not bad since we don't need the SWIG interface for now
+  // sub_domain->_geometric_dimension = mesh->geometry().dim();
 
   // Mark the sub domain as sub domain 0
   sub_domain->mark(sub_domains, 0, _check_midpoint);
 
   // Initialize from mesh function
   init_from_mesh_function(sub_domains, 0);
-  */
 }
 //-----------------------------------------------------------------------------
 void HermiteDirichletBC::init_from_mesh_function(const MeshFunction<std::size_t>& sub_domains,
@@ -713,15 +711,15 @@ void HermiteDirichletBC::compute_bc(Map& boundary_values, LocalData& data,
   // Choose strategy
   if (method == "topological")
     compute_bc_topological(boundary_values, data);
-  else if (method == "geometric")
+  /*else if (method == "geometric")   // MBD DISABLED
     compute_bc_geometric(boundary_values, data);
   else if (method == "pointwise")
-    compute_bc_pointwise(boundary_values, data);
+  compute_bc_pointwise(boundary_values, data);*/
   else
   {
     dolfin_error("HermiteDirichletBC.cpp",
                  "compute boundary conditions",
-                 "Unknown method for application of boundary conditions");
+                 "Unsupported method for application of boundary conditions");
   }
 }
 //-----------------------------------------------------------------------------
@@ -796,9 +794,11 @@ void HermiteDirichletBC::compute_bc_topological(Map& boundary_values,
     const ArrayView<const dolfin::la_index> cell_dofs
       = dofmap.cell_dofs(cell.index());
     auto cell_dofs_orig = dofmap.cell_dofs(cell.index());
-    for (auto i: cell_dofs_orig)
-      std::cout << i << " ";
-    std::cout << std::endl;
+
+    // MBD
+    // for (auto i: cell_dofs_orig)
+    //   std::cout << i << " ";
+    // std::cout << std::endl;
     
     // Tabulate which dofs are on the facet
     dofmap.tabulate_facet_dofs(data.facet_dofs, facet_local_index);
@@ -806,7 +806,7 @@ void HermiteDirichletBC::compute_bc_topological(Map& boundary_values,
     // Pick values for facet
     for (std::size_t i = 0; i < dofmap.num_facet_dofs(); i++)
     {
-      if (data.facet_dofs[i] % 3 != 0) {
+      if (data.facet_dofs[i] % 3 == 0) { //MBD
         const std::size_t local_dof = cell_dofs[data.facet_dofs[i]];
         const double value = data.w[data.facet_dofs[i]];
         boundary_values[local_dof] = value;

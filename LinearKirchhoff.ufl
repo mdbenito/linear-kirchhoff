@@ -1,5 +1,7 @@
 p22element = VectorElement("Lagrange", triangle, 2)
 dktelement = FiniteElement("DKT", triangle, 3)
+project_element = FiniteElement("Lagrange", triangle, 3)
+
 p = TrialFunction(p22element)
 q = TestFunction(p22element)
 p22 = inner(nabla_grad(p), nabla_grad(q))*dx
@@ -11,5 +13,12 @@ dkt = u*v*dx
 f = Coefficient(dktelement)
 force = f*v*dx
 
-elements = [p22element, dktelement]
-forms = [p22, dkt, force]
+# Define variational problem for projection
+g = Coefficient(project_element)
+Pg = TrialFunction(dktelement)
+w = TestFunction(dktelement)
+project_lhs = inner(w, Pg)*dx
+project_rhs = inner(w, g)*dx
+
+elements = [p22element, dktelement, project_element]
+forms = [p22, dkt, force, project_lhs, project_rhs]

@@ -4,27 +4,17 @@
 #include <dolfin.h>
 #include <Eigen/Dense>
 
-using namespace dolfin;
 
+#include "output.h"
 
-// I'm gonna have to specialize this at some point...
-template<typename mat_t>
-void
-dump_eigen(const mat_t& A)
-{
-  std::cout << std::setprecision(4);
-  for (std::size_t i = 0; i < A.rows(); ++i) {
-    for (std::size_t j = 0; j < A.cols(); ++j) {
-      std::cout << std::setw(8) << A(i,j);
-    }
-    std::cout << std::endl;
-  }
-}
+namespace dolfin {
 
-// template<typename T>
-void
-dump_full_tensor(const GenericMatrix& A)
-{
+  void
+  dump_full_tensor(const GenericMatrix& A, int precision)
+  {
+    if (true)  // to do
+      return;
+    
     auto num_rows = A.size(0);
     auto num_cols = A.size(1);
 
@@ -35,11 +25,12 @@ dump_full_tensor(const GenericMatrix& A)
     
     std::vector<double> block(num_rows*num_cols);
 
-    // std::cout << "rows: " << num_rows << ", cols: " << num_cols << "\n";
+    // std::cout << "rows: " << num_rows
+    //           << ", cols: " << num_cols << "\n";
     
     A.get(block.data(), num_rows, rows.data(), num_cols, cols.data());
 
-    std::cout << std::setprecision(14);
+    std::cout << std::setprecision(precision);
     for (int i = 0; i < num_rows; i++) {
       for (int j = 0; j < num_cols-1; j++) {
         std::cout << block[i*num_cols + j] << " ";
@@ -47,5 +38,24 @@ dump_full_tensor(const GenericMatrix& A)
       // Don't print a trailing space, it confuses numpy.loadtxt()
       std::cout << block[(i+1)*num_cols - 1] << std::endl;
     }
-}
+  }
 
+  void
+  dump_full_tensor(const GenericVector& A, int precision)
+  {
+    if (true)  // to do
+      return;
+
+    auto num_entries = A.size(0);
+
+    std::vector<double> block(num_entries);
+
+    A.get_local(block);
+
+    std::cout << std::setprecision(precision);
+    for (int i = 0; i < num_entries-1; i++)
+      std::cout << block[i] << " ";
+    std::cout << block[num_entries - 1] << std::endl;
+  }
+
+}
