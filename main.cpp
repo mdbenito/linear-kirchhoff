@@ -62,7 +62,7 @@ dostuff(void)
 {
   auto mesh = std::make_shared<RectangleMesh>(MPI_COMM_WORLD,
                                               Point (0, -M_PI/2), Point (M_PI, M_PI/2),
-                                              20, 20); //, "crossed");
+                                              20, 20, "crossed");
   auto W = std::make_shared<LinearKirchhoff::Form_dkt_FunctionSpace_0>(mesh);
   auto Theta = std::make_shared<LinearKirchhoff::Form_p22_FunctionSpace_0>(mesh);
   
@@ -105,7 +105,7 @@ dostuff(void)
   table("RHS assembly", "time") = toc();
   std::cout << "Done.\n";
 
-  dump_full_tensor(A, 3);
+  //dump_full_tensor(A, 3);
   
   std::cout << "Applying BCs... ";
   tic();
@@ -121,7 +121,7 @@ dostuff(void)
 
   // info(table);  // outputs "<Table of size 5 x 1>"
   std::cout << table.str(true) << std::endl;
-
+  /*
   std::cout << std::endl;
   dump_full_tensor(A, 3);
   std::cout << std::endl;
@@ -129,6 +129,7 @@ dostuff(void)
   std::cout << std::endl;
   dump_full_tensor(*u.vector(), 2);
   std::cout << std::endl;
+  */
   // Save solution in VTK format
   File file("solution.pvd");
   file << u;
@@ -159,8 +160,5 @@ main(void)
   
   File file("u0.pvd");
   file << *u0;
-
-  dostuff();
-  return 1;
-  
+  return 1; //dostuff();
 }
