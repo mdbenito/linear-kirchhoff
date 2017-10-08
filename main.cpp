@@ -140,6 +140,7 @@ dostuff(void)
 int
 main(void)
 {
+  /*
   auto mesh = std::make_shared<RectangleMesh>(MPI_COMM_WORLD,
                                               Point (0, -M_PI/2), Point (M_PI, M_PI/2),
                                               1, 1);//, "crossed");
@@ -160,5 +161,6 @@ main(void)
   
   File file("u0.pvd");
   file << *u0;
-  return 1; //dostuff();
+   */
+  return dostuff();
 }
