@@ -5,11 +5,12 @@ non-conforming Discrete Kirchhoff Triangles as described in [1].
 
 ## Dependencies
 
-Bundled in the docker image...
+Bundled in the docker image (TO DO).
 
 ## License
 
-Whatever
+All original code is released under the 
+ [GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 ## References
 
